@@ -54,9 +54,6 @@ class CustomUrlProtocol: URLProtocol {
     var response: URLResponse?
     var data: NSMutableData?
     
-    
-    static var requestCount = 0
-    
     open override class func canInit(with request: URLRequest) -> Bool {
         
         guard let url = request.url, let scheme = url.scheme else {
@@ -73,8 +70,6 @@ class CustomUrlProtocol: URLProtocol {
             return false
         }
         
-        requestCount = requestCount + 1
-        NSLog("Request #\(requestCount): CURL => \(request.cURL)")
         NetworkInterceptor.shared.logRequest(urlRequest: request)
         
         return false

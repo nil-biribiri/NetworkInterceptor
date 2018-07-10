@@ -17,7 +17,7 @@ public protocol RequestInterceptor: class {
     func stopRecording()
 }
 
-public protocol RequestLogger: class {
+public protocol RequestLogger {
     func excludedDomain() -> [String]
     func logRequest(urlRequest: URLRequest)
 }
@@ -28,13 +28,27 @@ public protocol RequestLogger: class {
     
     @objc public static let shared = NetworkInterceptor()
     
-    let loggers: [RequestLogger]
-    let interceptors: [RequestInterceptor]
+    var loggers: [RequestLogger]
+    var interceptors: [RequestInterceptor]
     
     
     private override init(){        
         interceptors = [ CustomUrlProtocolRequestInterceptor() ]
-        loggers = [ SlackRequestLogger() ]
+        loggers = [RequestLogger]()
+    }
+    
+    func setupLoggers(config: NetworkInterceptorConfig){
+        loggers.removeAll()
+        for loggingConfig in config.loggerConfigs {
+            switch loggingConfig {
+            case .slack(let slackToken, let channel, let username):
+                loggers.append(SlackRequestLogger(slackToken: slackToken, channel: channel, username: username))
+                continue
+            case .console:
+                loggers.append(ConsoleRequestLogger())
+                continue
+            }
+        }
     }
     
 }
